@@ -20,6 +20,7 @@ def memlogMCP(interval, recnum, logpath):
     RecCnt = 0
 
     now = datetime.now()
+    prevET = 0
     filename = logpath + '/log' + now.strftime('%Y%m%d_%H%M') + '.csv'
 
     try:
@@ -28,8 +29,11 @@ def memlogMCP(interval, recnum, logpath):
 
             now = time.perf_counter()
             ET = now - BaseTime
-            rem = ET % interval
-            time.sleep(interval - rem)
+            if interval > (ET - prevET):
+                rem = ET % interval
+                time.sleep(interval - rem)
+            
+            prevET = ET
 
             if recnum > 0:
                 RecCnt += 1
@@ -47,12 +51,13 @@ def logwrite(filename):
 
         # データ読出し
         data = plc.read('D0', 20)           # 読み出すデバイスのアドレスとワード数
+        print(data)
 
         # 日時
         now = datetime.now()
         f.write(now.strftime('%Y/%m/%d %H:%M:%S.') + "%03d" % (now.microsecond // 1000) + ',')
 
-        # 16ビット (D0-1)
+        # 16ビット*2 (D0-1)
         dataWordToBin = plc.WordToBin(data[:4])
         f.write(','.join(list(dataWordToBin.rjust(32,"0"))) + ',')
         
