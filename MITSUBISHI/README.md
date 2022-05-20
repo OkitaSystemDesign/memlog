@@ -70,9 +70,11 @@ f.write(','.join(datastr) + ',')
 ```
 
 次はINT32データ2個(10-18 byte目)
+```
 data32 = plc.toInt32(data[10:18])
 datastr = [str(n) for n  in data32]
 f.write(','.join(datastr) + ',')
+```
 
 次はUINT32データ1個 (18-21 byte目)        
 ```
