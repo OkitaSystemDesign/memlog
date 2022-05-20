@@ -4,6 +4,10 @@
 Python3.9  
 Frame3E UDP/IP connection
 
+## 実行例
+```
+memlogMCP(0.1, 100, 'log')
+```
 ## ファンクション
 ### memlogMCP(interval, recnum, logpath)
 定周期でlogwriteを実行します
