@@ -51,7 +51,6 @@ def logwrite(filename):
 
         # データ読出し
         data = plc.read('D0', 20)           # 読み出すデバイスのアドレスとワード数
-        print(data)
 
         # 日時
         now = datetime.now()
