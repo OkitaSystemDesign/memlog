@@ -54,7 +54,8 @@ def logwrite(filename):
         f.write(now.strftime('%Y/%m/%d %H:%M:%S.') + "%03d" % (now.microsecond // 1000) + ',')
 
         # 32ビット
-        f.write(','.join(list(plc.toBin(data[:4]).rjust(16,"0"))) + ',')
+        #f.write(','.join(list(plc.toBin(data[:4]).rjust(16,"0"))) + ',')
+        f.write(','.join(list(plc.WordToBin(data[:4]))) + ',')
         
         # INT16 * 2
         data16 = plc.toInt16(data[4:8])
