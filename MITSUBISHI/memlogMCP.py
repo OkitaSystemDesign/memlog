@@ -11,6 +11,18 @@ import mcp
 host = '192.168.0.41'
 port = 4999
 
+# モニタ登録
+# False: 連続アドレスで読み出す場合
+# True: モニタ登録して読み出す場合
+monitor = False
+
+# 連続アドレスで読み出すデバイスアドレス
+deviceAddress = 'D0'
+readSize = 20
+# モニタ登録して読み出すデバイスアドレス
+monitorWORDdevice = 'M0,M16,D0,D10,D12'             # ワード読出し
+monitorDWORDdevice = 'D100,D102,D105,D110,D120,D122,D130,D132'   # ダブルワード読出し
+
 ### memlogMCP ###
 # interval: 収集周期
 # recnum: 収集個数
@@ -22,6 +34,10 @@ def memlogMCP(interval, recnum, logpath):
     now = datetime.now()
     prevET = 0
     filename = logpath + '/log' + now.strftime('%Y%m%d_%H%M') + '.csv'
+
+    if monitor:
+        plc = mcp.MCProtcol3E(host, port)
+        res = plc.MonitorSet(monitorWORDdevice, monitorDWORDdevice)
 
     try:
         while True:
@@ -50,47 +66,51 @@ def logwrite(filename):
     with open(filename,'a') as f:
 
         # データ読出し
-        data = plc.read('D0', 20)           # 読み出すデバイスのアドレスとワード数
+        if monitor == False:
+            data = plc.read(deviceAddress, readSize)           # 読み出すデバイスのアドレスとワード数
+        else:
+            data = plc.MonitorGet()
 
         # 日時
         now = datetime.now()
         f.write(now.strftime('%Y/%m/%d %H:%M:%S.') + "%03d" % (now.microsecond // 1000) + ',')
 
-        # 16ビット*2 (D0-1)
+        # ---- 以下 読み出したバイト列をデータ型に合わせて変換しながらファイル出力 ----
+        # 16ビット*2
         dataWordToBin = plc.WordToBin(data[:4])
         f.write(','.join(list(dataWordToBin.rjust(32,"0"))) + ',')
         
-        # INT16 (D2,D3)
+        # INT16
         data16 = plc.toInt16(data[4:8])
         datastr = [str(n) for n  in data16]
         f.write(','.join(datastr) + ',')
 
-        # UINT16 (D4)
+        # UINT16
         data16 = plc.toUInt16(data[8:10])
         datastr = [str(n) for n  in data16]
         f.write(','.join(datastr) + ',')
 
-        # INT32 (D5,D7)
+        # INT32
         data32 = plc.toInt32(data[10:18])
         datastr = [str(n) for n  in data32]
         f.write(','.join(datastr) + ',')
         
-        # UINT32 (D9)
+        # UINT32
         data32 = plc.toUInt32(data[18:22])
         datastr = [str(n) for n  in data32]
         f.write(','.join(datastr) + ',')
 
-        # FLOAT (D11)
+        # FLOAT
         dataFloat = plc.toFloat(data[22:26])
         datastr = [str(n) for n  in dataFloat]
         f.write(','.join(datastr) + ',')
 
-        # DOUBLE (D13)
+        # DOUBLE
         dataDouble = plc.toDouble(data[26:34])
         datastr = [str(n) for n  in dataDouble]
         f.write(','.join(datastr) + ',')
 
-        # STRING (D17)
+        # STRING
         dataStr = plc.toString(data[34:40])
         f.write(dataStr + '\n')
 
