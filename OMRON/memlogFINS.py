@@ -7,10 +7,21 @@ from datetime import datetime
 # https://github.com/OkitaSystemDesign/FinsCommand
 import finsudp
 
-# シーケンサのIPアドレスとFINSアドレス（送信元と送信先）
+# PLCのIPアドレスとFINSアドレス（送信元と送信先）
 host = '192.168.0.21'
 srcFinsAdr = '0.21.0'
 dstFinsAdr = '0.10.0'
+
+# 複合読出し
+# False: 連続アドレスで読み出す場合
+# True: 複合読出しする場合
+multi = False
+
+# 連続アドレスで読み出すメモリアドレス
+address = 'D0'
+readSize = 20
+# 複合読出しするメモリアドレス
+multiAddress = 'W100,W101,D1000,D1001,D1010,D1020,D1021,D1022,D1023,D1030,D1031,D1040,D1041,D1050,D1051,D1052,D1053,D1060,D1061,D1062'
 
 ### memlogFINS ###
 # interval: 収集周期
@@ -47,14 +58,16 @@ def logwrite(filename):
     with open(filename,'a') as f:
 
         # データ読出し
-        data = plc.read('D1000', 20)        # 読み出すメモリのアドレスとワード数
+        if multi == False:
+            data = plc.read(address, readSize)
+        else:
+            data = plc.multiRead(multiAddress)
 
         # 日時
         now = datetime.now()
         f.write(now.strftime('%Y/%m/%d %H:%M:%S.') + "%03d" % (now.microsecond // 1000) + ',')
 
         # 32ビット
-        #f.write(','.join(list(plc.toBin(data[:4]).rjust(16,"0"))) + ',')
         f.write(','.join(list(plc.WordToBin(data[:4]))) + ',')
         
         # INT16 * 2
