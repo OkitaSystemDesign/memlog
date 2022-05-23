@@ -85,4 +85,4 @@ f.write(','.join(datas[1:]) + '\n')
 ```
 
 # Qiita記事
-https://qiita.com/OkitaSystemDesign/items/ee25befed0b98d1d3588
+https://qiita.com/OkitaSystemDesign/items/5692936697f9119a4f1f
